@@ -1,5 +1,4 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { RecoilRoot } from "recoil";
 import { ThemeProvider } from "styled-components";
 import App from "./App";
@@ -72,16 +71,16 @@ a {
 }
 `;
 
-ReactDOM.render(
-  <React.StrictMode>
-    <RecoilRoot>
-      <HelmetProvider>
-        <ThemeProvider theme={darkTheme}>
-          <GlobalStyle />
-          <App />
-        </ThemeProvider>
-      </HelmetProvider>
-    </RecoilRoot>
-  </React.StrictMode>,
-  document.getElementById("root")
+const container = document.getElementById("root");
+const root = createRoot(container!); //Using Typescript
+
+root.render(
+  <RecoilRoot>
+    <HelmetProvider>
+      <ThemeProvider theme={darkTheme}>
+        <GlobalStyle />
+        <App />
+      </ThemeProvider>
+    </HelmetProvider>
+  </RecoilRoot>
 );
