@@ -18,7 +18,7 @@ const Loader = styled.div`
 `;
 
 const Banner = styled.div<{ $bgPhoto: string }>`
-  height: 100vh;
+  height: 75vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -40,7 +40,6 @@ const Overview = styled.p`
 
 const Slider = styled.div`
   position: relative;
-  top: -100px;
 `;
 
 const Row = styled(motion.div)`
@@ -58,6 +57,12 @@ const Box = styled(motion.div)<{ $bgPhoto: string }>`
   background-position: center center;
   height: 200px;
   font-size: 66px;
+  &:first-child {
+    transform-origin: center left;
+  }
+  &:last-child {
+    transform-origin: center right;
+  }
 `;
 
 const rowVariants = {
@@ -72,6 +77,21 @@ const rowVariants = {
   },
 };
 
+const boxVariants = {
+  normal: {
+    scale: 1,
+  },
+  hover: {
+    scale: 1.3,
+    y: -50,
+    transition: {
+      delay: 0.5,
+      duaration: 0.3,
+      type: "tween",
+    },
+  },
+};
+
 const offset = 6;
 
 function Home() {
@@ -83,7 +103,6 @@ function Home() {
   const [leaving, setLeaving] = useState(false);
   const incraseIndex = () => {
     if (data) {
-      console.log(data);
       if (leaving) return;
       toggleLeaving();
       const totalMovies = data.results.length - 1;
@@ -100,7 +119,11 @@ function Home() {
         <>
           <Banner
             onClick={incraseIndex}
-            $bgPhoto={makeImagePath(data?.results[0].backdrop_path || "")}
+            $bgPhoto={makeImagePath(
+              data?.results[0].backdrop_path ||
+                data?.results[0].poster_path ||
+                ""
+            )}
           >
             <Title>{data?.results[0].title}</Title>
             <Overview>{data?.results[0].overview}</Overview>
@@ -121,7 +144,14 @@ function Home() {
                   .map((movie) => (
                     <Box
                       key={movie.id}
-                      $bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
+                      whileHover="hover"
+                      initial="normal"
+                      variants={boxVariants}
+                      transition={{ type: "tween" }}
+                      $bgPhoto={makeImagePath(
+                        movie.backdrop_path || movie.poster_path,
+                        "w500"
+                      )}
                     />
                   ))}
               </Row>
