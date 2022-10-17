@@ -4,6 +4,7 @@ import { ThemeProvider } from "styled-components";
 import App from "./App";
 import { theme } from "./theme";
 import { createGlobalStyle } from "styled-components";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 
 const GlobalStyle = createGlobalStyle`
@@ -69,6 +70,7 @@ a {
   color:inherit;
 }
 `;
+const client = new QueryClient();
 
 const container = document.getElementById("root");
 const root = createRoot(container!); //Using Typescript
@@ -76,10 +78,12 @@ const root = createRoot(container!); //Using Typescript
 root.render(
   <RecoilRoot>
     <HelmetProvider>
-      <ThemeProvider theme={theme}>
-        <GlobalStyle />
-        <App />
-      </ThemeProvider>
+      <QueryClientProvider client={client}>
+        <ThemeProvider theme={theme}>
+          <GlobalStyle />
+          <App />
+        </ThemeProvider>
+      </QueryClientProvider>
     </HelmetProvider>
   </RecoilRoot>
 );
