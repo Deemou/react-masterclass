@@ -82,6 +82,25 @@ const Info = styled(motion.div)`
   }
 `;
 
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+`;
+
+const BigMovie = styled(motion.div)`
+  position: fixed;
+  width: 40vw;
+  height: 80vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  top: 10vh;
+`;
+
 const rowVariants = {
   hidden: {
     x: window.outerWidth,
@@ -125,7 +144,6 @@ const offset = 6;
 function Home() {
   const navigate = useNavigate();
   const moviePathMatch: PathMatch<string> | null = useMatch("/movies/:id");
-  console.log(moviePathMatch);
   const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["movies", "nowPlaying"],
     getMovies
@@ -145,6 +163,7 @@ function Home() {
   const onBoxClicked = (movieId: number) => {
     navigate(`/movies/${movieId}`);
   };
+  const onOverlayClick = () => navigate("/");
   return (
     <Wrapper>
       {isLoading ? (
@@ -199,19 +218,16 @@ function Home() {
           </Slider>
           <AnimatePresence>
             {moviePathMatch ? (
-              <motion.div
-                layoutId={moviePathMatch.params.movieId}
-                style={{
-                  position: "absolute",
-                  width: "40vw",
-                  height: "80vh",
-                  backgroundColor: "red",
-                  top: 50,
-                  left: 0,
-                  right: 0,
-                  margin: "0 auto",
-                }}
-              />
+              <>
+                <Overlay
+                  onClick={onOverlayClick}
+                  exit={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                />
+                <BigMovie layoutId={moviePathMatch.params.movieId}>
+                  hello
+                </BigMovie>
+              </>
             ) : null}
           </AnimatePresence>
         </>
