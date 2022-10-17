@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import { RecoilRoot } from "recoil";
 import { ThemeProvider } from "styled-components";
 import App from "./App";
-import { darkTheme } from "./theme";
+import { theme } from "./theme";
 import { createGlobalStyle } from "styled-components";
 import { HelmetProvider } from "react-helmet-async";
 
@@ -76,7 +76,7 @@ const root = createRoot(container!); //Using Typescript
 root.render(
   <RecoilRoot>
     <HelmetProvider>
-      <ThemeProvider theme={darkTheme}>
+      <ThemeProvider theme={theme}>
         <GlobalStyle />
         <App />
       </ThemeProvider>
