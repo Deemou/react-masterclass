@@ -250,7 +250,7 @@ function Coin() {
           <Outlet
             context={
               chartMatch
-                ? { coinId, name: infoData?.name }
+                ? { coinId, name: infoData?.name, isDark }
                 : priceMatch
                 ? { data: tickersData?.quotes.USD }
                 : null
