@@ -1,9 +1,19 @@
-import { useQuery } from "react-query";
-import { useLocation, useParams, useMatch } from "react-router";
-import { Link, Outlet } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHome, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useMatch,
+  useParams,
+} from "react-router-dom";
 import styled from "styled-components";
 import { Helmet } from "react-helmet-async";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { isDarkAtom } from "../atoms";
 import { fetchCoinInfo, fetchCoinTickers } from "../api";
+import { NavigationIcon } from "./Coins";
 
 const Title = styled.h1`
   font-size: 48px;
@@ -28,6 +38,15 @@ const Header = styled.header`
   align-items: center;
 `;
 
+const NavigationContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+  position: fixed;
+  top: 30px;
+  left: 30px;
+`;
+
 const Overview = styled.div`
   display: flex;
   justify-content: space-between;
@@ -35,6 +54,7 @@ const Overview = styled.div`
   padding: 10px 20px;
   border-radius: 10px;
 `;
+
 const OverviewItem = styled.div`
   display: flex;
   flex-direction: column;
@@ -71,9 +91,11 @@ const Tab = styled.span<{ isActive: boolean }>`
     display: block;
   }
 `;
+
 interface RouteParams {
   coinId: string;
 }
+
 interface RouteState {
   state: {
     name: string;
@@ -148,10 +170,15 @@ function Coin() {
     ["tickers", coinId],
     () => fetchCoinTickers(coinId),
     {
-      refetchInterval: 5000,
+      refetchIntervalInBackground: true,
     }
   );
+
   const loading = infoLoading || tickersLoading;
+  const isDark = useRecoilValue(isDarkAtom);
+  const setDarkAtom = useSetRecoilState(isDarkAtom);
+  const toggleDarkAtom = () => setDarkAtom((prev) => !prev);
+
   return (
     <Container>
       <Helmet>
@@ -159,6 +186,24 @@ function Coin() {
           {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
         </title>
       </Helmet>
+
+      <NavigationContainer>
+        <NavigationIcon>
+          <Link to={"/"}>
+            <FontAwesomeIcon icon={faHome} />
+          </Link>
+        </NavigationIcon>
+        {isDark ? (
+          <NavigationIcon onClick={toggleDarkAtom}>
+            <FontAwesomeIcon icon={faSun} />
+          </NavigationIcon>
+        ) : (
+          <NavigationIcon onClick={toggleDarkAtom}>
+            <FontAwesomeIcon icon={faMoon} />
+          </NavigationIcon>
+        )}
+      </NavigationContainer>
+
       <Header>
         <Title>
           {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
@@ -202,7 +247,15 @@ function Coin() {
               <Link to={`/${coinId}/price`}>Price</Link>
             </Tab>
           </Tabs>
-          <Outlet />
+          <Outlet
+            context={
+              chartMatch
+                ? { coinId, name: infoData?.name }
+                : priceMatch
+                ? { data: tickersData?.quotes.USD }
+                : null
+            }
+          />
         </>
       )}
     </Container>

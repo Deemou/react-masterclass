@@ -1,31 +1,43 @@
-import { useQuery } from "react-query";
-import { useParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useOutletContext } from "react-router-dom";
 import { fetchCoinHistory } from "../api";
 import ApexChart from "react-apexcharts";
-
-interface IHistorical {
-  time_open: string;
-  time_close: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
+import { useRecoilValue } from "recoil";
+import { isDarkAtom } from "../atoms";
+interface ChartProps {
+  coinId: string;
+  name: string;
+}
+interface IData {
+  time_open: number;
+  time_close: number;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+  volume: string;
   market_cap: number;
 }
-
-interface RouteParams {
-  coinId: string;
-}
 function Chart() {
-  const { coinId } = useParams() as unknown as RouteParams;
-  const { isLoading, data } = useQuery<IHistorical[]>(
-    ["ohlcv", coinId],
-    () => fetchCoinHistory(coinId),
-    {
-      refetchInterval: 10000,
-    }
+  const { coinId, name } = useOutletContext<ChartProps>();
+  const { isLoading, data } = useQuery<IData[]>(
+    ["price in chart", coinId],
+    () => fetchCoinHistory(coinId)
   );
+  const isDark = useRecoilValue(isDarkAtom);
+  const exceptData = data ?? [];
+  const chartData = exceptData?.map((i) => {
+    return {
+      x: i.time_close,
+      y: [
+        Number(i.open).toFixed(2),
+        Number(i.high).toFixed(2),
+        Number(i.low).toFixed(2),
+        Number(i.close).toFixed(2),
+      ],
+    };
+  });
+
   return (
     <div>
       {isLoading ? (
@@ -35,74 +47,46 @@ function Chart() {
           type="candlestick"
           series={[
             {
-              data: data?.map((price) => ({
-                x: new Date(price.time_open),
-                y: [
-                  price.open.toFixed(3),
-                  price.high.toFixed(3),
-                  price.low.toFixed(3),
-                  price.close.toFixed(3),
-                ],
-              })) as [{ x: Date; y: string[] }],
+              data: chartData,
             },
           ]}
           options={{
-            theme: {
-              mode: "dark",
-            },
             chart: {
-              height: 300,
-              width: 500,
+              type: "candlestick",
+              height: 350,
+              background: "transparent",
               toolbar: {
                 show: false,
               },
-              background: "transparent",
             },
-            grid: { show: false },
+            title: {
+              text: `${name} chart`,
+              align: "center",
+              style: {
+                fontSize: "17px",
+              },
+            },
             xaxis: {
-              axisBorder: { show: false },
-              axisTicks: { show: false },
               type: "datetime",
             },
             yaxis: {
-              labels: {
-                formatter: (value) => `$${value.toFixed(3)}`,
-              },
               tooltip: {
                 enabled: true,
               },
             },
-            // tooltip: {
-            //   custom: function ({ seriesIndex, dataPointIndex, w }) {
-            //     const o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
-            //     const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
-            //     const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
-            //     const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
-            //     return (
-            //       '<div class="apexcharts-tooltip-candlestick" style="margin: 10px;">' +
-            //       '<div>Open: <span class="value">' +
-            //       `$${o.toFixed(2)}` +
-            //       "</span></div>" +
-            //       '<div>High: <span class="value">' +
-            //       `$${h.toFixed(2)}` +
-            //       "</span></div>" +
-            //       '<div>Low: <span class="value">' +
-            //       `$${l.toFixed(2)}` +
-            //       "</span></div>" +
-            //       '<div>Close: <span class="value">' +
-            //       `$${c.toFixed(2)}` +
-            //       "</span></div>" +
-            //       "</div>"
-            //     );
-            //   },
-            // },
             plotOptions: {
               candlestick: {
                 colors: {
-                  upward: "#f84646",
-                  downward: "#374bff",
+                  upward: "#ff5e57",
+                  downward: "#0fbcf9",
+                },
+                wick: {
+                  useFillColor: true,
                 },
               },
+            },
+            theme: {
+              mode: isDark ? "dark" : "light",
             },
           }}
         />

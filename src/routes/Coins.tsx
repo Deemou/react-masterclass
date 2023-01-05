@@ -1,8 +1,12 @@
-import { useQuery } from "react-query";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { fetchCoins } from "../api";
 import { Helmet } from "react-helmet-async";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { isDarkAtom } from "../atoms";
+import { fetchCoins } from "../api";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -20,10 +24,12 @@ const Header = styled.header`
 const CoinsList = styled.ul``;
 
 const Coin = styled.li`
-  background-color: white;
-  color: ${(props) => props.theme.bgColor};
+  background-color: ${(props) => props.theme.cardBgColor};
+  color: ${(props) => props.theme.textColor};
+  border: 1px solid ${(props) => props.theme.borderColor};
   border-radius: 15px;
   margin-bottom: 10px;
+
   a {
     display: flex;
     align-items: center;
@@ -53,6 +59,34 @@ const Img = styled.img`
   margin-right: 10px;
 `;
 
+export const NavigationContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 30px;
+  left: 30px;
+`;
+
+export const NavigationIcon = styled.div`
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: ${(props) => props.theme.textColor};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-top: 2px;
+  &:hover {
+    cursor: pointer;
+  }
+  svg {
+    font-size: 22px;
+    background-color: inherit;
+    color: ${(props) => props.theme.bgColor};
+  }
+`;
+
 interface ICoin {
   id: string;
   name: string;
@@ -64,14 +98,35 @@ interface ICoin {
 }
 
 function Coins() {
-  const { isLoading, data } = useQuery<ICoin[]>("allCoins", fetchCoins);
+  const { isLoading, data } = useQuery<ICoin[]>(["allCoins"], fetchCoins);
+  const isDark = useRecoilValue(isDarkAtom);
+  const setDarkAtom = useSetRecoilState(isDarkAtom);
+  const toggleDarkAtom = () => setDarkAtom((prev) => !prev);
+
   return (
     <Container>
       <Helmet>
-        <title>코인</title>
+        <title>Crypto Tracker</title>
       </Helmet>
+
+      <NavigationContainer>
+        {isDark ? (
+          <NavigationIcon onClick={toggleDarkAtom}>
+            <Link to={"/"}>
+              <FontAwesomeIcon icon={faSun} />
+            </Link>
+          </NavigationIcon>
+        ) : (
+          <NavigationIcon onClick={toggleDarkAtom}>
+            <Link to={"/"}>
+              <FontAwesomeIcon icon={faMoon} />
+            </Link>
+          </NavigationIcon>
+        )}
+      </NavigationContainer>
+
       <Header>
-        <Title>코인</Title>
+        <Title>Crypto Tracker</Title>
       </Header>
       {isLoading ? (
         <Loader>Loading...</Loader>
