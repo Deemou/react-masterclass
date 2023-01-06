@@ -17,7 +17,15 @@ export function fetchCoinTickers(coinId: string) {
 }
 
 export function fetchCoinHistory(coinId: string) {
-  return fetch(
-    `https://ohlcv-api.nomadcoders.workers.dev?coinId=${coinId}`
-  ).then((response) => response.json());
+  return fetch(`https://ohlcv-api.nomadcoders.workers.dev?coinId=${coinId}`)
+    .then((response) => {
+      if (response.status === 400) {
+        throw new Error("Price Data Not Found.");
+      }
+      return response.json();
+    })
+    .catch((e) => {
+      console.clear();
+      return null;
+    });
 }

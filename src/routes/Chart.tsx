@@ -2,10 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useOutletContext } from "react-router-dom";
 import { fetchCoinHistory } from "../api";
 import ApexChart from "react-apexcharts";
+import styled from "styled-components";
+
+const Message = styled.div`
+  text-align: center;
+  font-size: 20px;
+`;
 
 interface ChartProps {
   coinId: string;
-  name: string;
   isDark: boolean;
 }
 
@@ -21,28 +26,27 @@ interface IData {
 }
 
 function Chart() {
-  const { coinId, name, isDark } = useOutletContext<ChartProps>();
+  const { coinId, isDark } = useOutletContext<ChartProps>();
   const { isLoading, data } = useQuery<IData[]>(
     ["price in chart", coinId],
     () => fetchCoinHistory(coinId)
   );
-  const exceptData = data ?? [];
-  const chartData = exceptData?.map((i) => {
-    return {
-      x: i.time_close,
-      y: [
-        Number(i.open).toFixed(2),
-        Number(i.high).toFixed(2),
-        Number(i.low).toFixed(2),
-        Number(i.close).toFixed(2),
-      ],
-    };
-  });
+  const chartData = data?.map((price) => ({
+    x: new Date(price.time_open * 1000),
+    y: [
+      Number(price.open).toFixed(2),
+      Number(price.high).toFixed(2),
+      Number(price.low).toFixed(2),
+      Number(price.close).toFixed(2),
+    ],
+  }));
 
   return (
     <div>
       {isLoading ? (
         "Loading chart..."
+      ) : !chartData ? (
+        <Message>Sorry! We can't provide any chart.</Message>
       ) : (
         <ApexChart
           type="candlestick"
@@ -52,25 +56,22 @@ function Chart() {
             },
           ]}
           options={{
+            theme: {
+              mode: isDark ? "dark" : "light",
+            },
             chart: {
-              type: "candlestick",
-              height: 350,
               background: "transparent",
               toolbar: {
                 show: false,
-              },
-            },
-            title: {
-              text: `${name} chart`,
-              align: "center",
-              style: {
-                fontSize: "17px",
               },
             },
             xaxis: {
               type: "datetime",
             },
             yaxis: {
+              labels: {
+                formatter: (value) => `$${value.toFixed(1)}`,
+              },
               tooltip: {
                 enabled: true,
               },
@@ -78,16 +79,13 @@ function Chart() {
             plotOptions: {
               candlestick: {
                 colors: {
-                  upward: "#ff5e57",
-                  downward: "#0fbcf9",
+                  upward: "#f84646",
+                  downward: "#374bff",
                 },
                 wick: {
                   useFillColor: true,
                 },
               },
-            },
-            theme: {
-              mode: isDark ? "dark" : "light",
             },
           }}
         />
