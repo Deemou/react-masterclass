@@ -2,16 +2,16 @@ import { DefaultTheme } from "styled-components";
 
 export const darkTheme: DefaultTheme = {
   textColor: "white",
-  borderColor: "white",
-  accentColor: "#00E396",
+  borderColor: "444c56",
+  accentColor: "#00cc84",
   bgColor: "#2f3640",
-  cardBgColor: "transparent",
+  cardBgColor: "#444c56",
 };
 
 export const lightTheme: DefaultTheme = {
   textColor: "black",
-  borderColor: "black",
-  accentColor: "#70a1ff",
-  bgColor: "#f1f2f6",
-  cardBgColor: "transparent",
+  borderColor: "#edd8c2",
+  accentColor: "#875009",
+  bgColor: "#f4e4d2",
+  cardBgColor: "#edd8c2",
 };

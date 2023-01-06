@@ -13,45 +13,15 @@ import { Helmet } from "react-helmet-async";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { isDarkAtom } from "../atoms";
 import { fetchCoinInfo, fetchCoinTickers } from "../api";
-import { NavigationIcon } from "./Coins";
-
-const Title = styled.h1`
-  font-size: 48px;
-  color: ${(props) => props.theme.accentColor};
-`;
-
-const Loader = styled.span`
-  text-align: center;
-  display: block;
-`;
-
-const Container = styled.div`
-  padding: 0px 20px;
-  max-width: 480px;
-  margin: 0 auto;
-`;
-
-const Header = styled.header`
-  height: 15vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const NavigationContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 90%;
-  position: fixed;
-  top: 30px;
-  left: 30px;
-`;
+import { Header, NavigationIcon, Title } from "../components/Header";
+import { Container, Loader } from "../components/Container";
 
 const Overview = styled.div`
   display: flex;
   justify-content: space-between;
   background-color: rgba(0, 0, 0, 0.2);
-  padding: 10px 20px;
+  padding: 20px 20px;
+  margin-bottom: 30px;
   border-radius: 10px;
 `;
 
@@ -60,14 +30,11 @@ const OverviewItem = styled.div`
   flex-direction: column;
   align-items: center;
   span:first-child {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 400;
     text-transform: uppercase;
     margin-bottom: 5px;
   }
-`;
-const Description = styled.p`
-  margin: 20px 0px;
 `;
 
 const Tabs = styled.div`
@@ -80,7 +47,7 @@ const Tabs = styled.div`
 const Tab = styled.span<{ isActive: boolean }>`
   text-align: center;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
@@ -177,19 +144,22 @@ function Coin() {
   const toggleDarkAtom = () => setDarkAtom((prev) => !prev);
 
   return (
-    <Container>
+    <>
       <Helmet>
         <title>
           {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
         </title>
       </Helmet>
 
-      <NavigationContainer>
+      <Header>
         <NavigationIcon>
           <Link to={"/"}>
             <FontAwesomeIcon icon={faHome} />
           </Link>
         </NavigationIcon>
+        <Title>
+          {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
+        </Title>
         {isDark ? (
           <NavigationIcon onClick={toggleDarkAtom}>
             <FontAwesomeIcon icon={faSun} />
@@ -199,63 +169,59 @@ function Coin() {
             <FontAwesomeIcon icon={faMoon} />
           </NavigationIcon>
         )}
-      </NavigationContainer>
-
-      <Header>
-        <Title>
-          {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
-        </Title>
       </Header>
-      {loading ? (
-        <Loader>Loading...</Loader>
-      ) : (
-        <>
-          <Overview>
-            <OverviewItem>
-              <span>Rank:</span>
-              <span>{infoData?.rank}</span>
-            </OverviewItem>
-            <OverviewItem>
-              <span>Symbol:</span>
-              <span>${infoData?.symbol}</span>
-            </OverviewItem>
-            <OverviewItem>
-              <span>Price:</span>
-              <span>${tickersData?.quotes.USD.price.toFixed(3)}</span>
-            </OverviewItem>
-          </Overview>
-          <Description>{infoData?.description}</Description>
-          <Overview>
-            <OverviewItem>
-              <span>Total Suply:</span>
-              <span>{tickersData?.total_supply}</span>
-            </OverviewItem>
-            <OverviewItem>
-              <span>Max Supply:</span>
-              <span>{tickersData?.max_supply}</span>
-            </OverviewItem>
-          </Overview>
 
-          <Tabs>
-            <Tab isActive={chartMatch !== null}>
-              <Link to={`/${coinId}/chart`}>Chart</Link>
-            </Tab>
-            <Tab isActive={priceMatch !== null}>
-              <Link to={`/${coinId}/price`}>Price</Link>
-            </Tab>
-          </Tabs>
-          <Outlet
-            context={
-              chartMatch
-                ? { coinId, name: infoData?.name, isDark }
-                : priceMatch
-                ? { data: tickersData?.quotes.USD }
-                : null
-            }
-          />
-        </>
-      )}
-    </Container>
+      <Container>
+        {loading ? (
+          <Loader>Loading...</Loader>
+        ) : (
+          <>
+            <Overview>
+              <OverviewItem>
+                <span>Rank</span>
+                <span>{infoData?.rank}</span>
+              </OverviewItem>
+              <OverviewItem>
+                <span>Symbol</span>
+                <span>${infoData?.symbol}</span>
+              </OverviewItem>
+              <OverviewItem>
+                <span>Price</span>
+                <span>${tickersData?.quotes.USD.price.toFixed(3)}</span>
+              </OverviewItem>
+            </Overview>
+            <Overview>
+              <OverviewItem>
+                <span>Total Suply</span>
+                <span>{tickersData?.total_supply}</span>
+              </OverviewItem>
+              <OverviewItem>
+                <span>Max Supply</span>
+                <span>{tickersData?.max_supply}</span>
+              </OverviewItem>
+            </Overview>
+
+            <Tabs>
+              <Tab isActive={chartMatch !== null}>
+                <Link to={`/${coinId}/chart`}>Chart</Link>
+              </Tab>
+              <Tab isActive={priceMatch !== null}>
+                <Link to={`/${coinId}/price`}>Price</Link>
+              </Tab>
+            </Tabs>
+            <Outlet
+              context={
+                chartMatch
+                  ? { coinId, isDark }
+                  : priceMatch
+                  ? { data: tickersData?.quotes.USD }
+                  : null
+              }
+            />
+          </>
+        )}
+      </Container>
+    </>
   );
 }
 export default Coin;
